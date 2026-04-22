@@ -1,15 +1,17 @@
-# Git
-.git
-.gitignore
-.gitmodules
-
-# Dependencies
-node_modules
-
-# CI/CD
-.github
-
-# Environment files
+venv/
+node_modules/
+__pycache__/
+*.pyc
+.git/
+.venv/
+website/
+landingpage/
+tests/
 .env
-
-*.md
+*.egg-info/
+dist/
+build/
+.flake8
+.pytest_cache/
+.mypy_cache/
+docs/

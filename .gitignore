@@ -58,3 +58,15 @@ mini-swe-agent/
 # Nix
 .direnv/
 result
+
+# Large directories not needed in Docker image
+website/
+landingpage/
+tests/
+.mypy_cache/
+.pytest_cache/
+docs/
+.env
+*.egg-info/
+dist/
+build/

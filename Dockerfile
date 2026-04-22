@@ -1,27 +1,26 @@
 FROM debian:13.4
 
-# Disable Python stdout buffering to ensure logs are printed immediately
 ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies in one layer, clear APT cache
+# Minimal system deps — only what's needed for Telegram bot
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        build-essential nodejs npm python3 python3-pip ripgrep ffmpeg gcc python3-dev libffi-dev procps && \
-    rm -rf /var/lib/apt/lists/*
+        python3 python3-pip python3-venv curl \
+        libffi7 libffi-dev procps \
+        && rm -rf /var/lib/apt/lists/*
+
+# Use uv for fast Python package installation
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv /root/.local/bin/uv /usr/local/bin/uv
 
 COPY . /opt/hermes
 WORKDIR /opt/hermes
 
-# Install Python and Node dependencies in one layer, no cache
-RUN pip install --no-cache-dir uv --break-system-packages && \
-    uv pip install --system --break-system-packages --no-cache -e ".[all]" && \
-    npm install --prefer-offline --no-audit && \
-    npx playwright install --with-deps chromium --only-shell && \
-    cd /opt/hermes/scripts/whatsapp-bridge && \
-    npm install --prefer-offline --no-audit && \
-    npm cache clean --force
+# Install only what we need: core + messaging (Telegram) + cron
+RUN /usr/local/bin/uv pip install --system --break-system-packages --no-cache \
+    -e ".[messaging,cron,cli,pty,honcho,acp,mcp]"
 
-WORKDIR /opt/hermes
 RUN chmod +x /opt/hermes/docker/entrypoint.sh
 
 ENV HERMES_HOME=/opt/data
